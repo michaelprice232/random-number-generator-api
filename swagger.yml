@@ -1,0 +1,40 @@
+---
+swagger: "2.0"    #todo: v3 available
+info:
+  description: This is the swagger file that goes with our server code
+  version: "1.0.0"
+  title: Swagger REST Article
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api
+
+# Paths supported by the server application
+paths:
+  /random_number:
+    get:
+      # Path to the python function which will respond to this request
+      operationId: server.generate_random_number
+
+      # Grouping in the UI
+      tags:
+        - Random
+      summary: Return a random number
+      description: Return a random number up to the maximum allowed range (defined by max_range)
+      parameters:
+        - name: max_range
+          in: query
+          type: string
+          description: Maximum range to generate a number from
+          required: false
+
+      responses:
+        200:
+          description: Successfully generated a random number
+          schema:
+            properties:
+              number:
+                type: integer
+
