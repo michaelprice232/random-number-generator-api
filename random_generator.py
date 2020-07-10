@@ -6,6 +6,15 @@ import psycopg2
 from datetime import datetime
 from random import randrange
 import sys
+import json
+
+
+def get_env_variable(name):
+    try:
+        return os.environ[name]
+    except KeyError:
+        message = "Expected environment variable '{}' not set.".format(name)
+        raise Exception(message)
 
 
 def connect_to_database(host, user, password, database):
@@ -62,17 +71,19 @@ def generate_random_number(max_range=5):
 
     # Write record to database table
     write_record_to_table(con, db_table_name, random_number, generation_timestamp)
-    return random_number
+    random_number_obj = {"random_number": random_number}
+    return json.dumps(random_number_obj)
 
 
 # load .env file for EnVars and assign to variables
 load_dotenv()
-db_hostname = os.environ.get("DB_HOSTNAME")
-db_username = os.environ.get("DB_USERNAME")
-db_password = os.environ.get("DB_PASSWORD")
-db_database_name = os.environ.get("DB_DATABASE_NAME")
-db_table_name = os.environ.get("DB_TABLE_NAME")
-maximum_number_range = int(os.environ.get("MAXIMUM_NUMBER_RANGE"))      # todo: implement
+db_hostname = get_env_variable("DB_HOSTNAME")
+db_username = get_env_variable("DB_USERNAME")
+db_password = get_env_variable("DB_PASSWORD")
+db_database_name = get_env_variable("DB_DATABASE_NAME")
+db_table_name = get_env_variable("DB_TABLE_NAME")
+maximum_number_range = int(get_env_variable("MAXIMUM_NUMBER_RANGE"))      # todo: implement
+
 
 # Dump EnVars
 print("Dumping EnVars:\nhostname={}\nusername={}\ndatabase_name={}\ntable_name={}\nmaximum_number_range={}\n"
@@ -81,7 +92,6 @@ print("Dumping EnVars:\nhostname={}\nusername={}\ndatabase_name={}\ntable_name={
 
 # Connect to the database
 con = connect_to_database(db_hostname, db_username, db_password, db_database_name)
-print(con)
 
 # Create the application instance
 # Connexion uses Flask under the hood
