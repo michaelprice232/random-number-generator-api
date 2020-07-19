@@ -17,33 +17,15 @@ def random_number():
 
     :return: dict containing the random number, current time & and the max range
     """
+    # Retrieve query string to see if we are overriding the default max range
     max_query_param = request.args.get('max')
 
     if max_query_param is None:
         # 'max' query string has not been passed; use default
-        resp = generator.generate_random_number(Config.MAXIMUM_NUMBER_RANGE)
-        generator.write_to_database(resp)
-        return_object = {
-            'Number': resp[0],
-            'Created_at': resp[1].strftime("%Y-%m-%d %H:%M:%S"),
-            'Max_range': Config.MAXIMUM_NUMBER_RANGE
-        }
-        return return_object
+        return generator.random_number_handler(Config.DEFAULT_MAXIMUM_NUMBER_RANGE)
     else:
         # 'max' query string has been passed. Override the default
-        try:
-            max_range = int(max_query_param)
-            print("Using custom query parm: {}".format(max_range))
-            resp = generator.generate_random_number(max_range)
-            generator.write_to_database(resp)
-            return_object = {
-                'Number': resp[0],
-                'Created_at': resp[1].strftime("%Y-%m-%d %H:%M:%S"),
-                'Max_range': max_range
-            }
-            return return_object
-        except ValueError as e:
-            return "ERR: 'max' query parameter must be an integer", 400
+        return generator.random_number_handler(max_query_param)
 
 
 @app.route('/show_numbers')
@@ -52,20 +34,15 @@ def show_numbers():
     Show all the entries in the database table for previously generated random numbers
     :return: dict containing a list of all random numbers which have been recorded in the database
     """
-    results = [{'id': n.id,
-                'number': n.number,
-                'timestamp': n.timestamp,
-                'max_range': n.max_range
-                } for n in models.Numbers.query.all()]
-    result_obj = {'numbers': results}
-    return result_obj
+    return generator.show_numbers_handler()
 
 
 # Avoid circular dependencies
-from random_number import models, generator
+from random_number import generator, models
 
 # Create tables
 try:
     db.create_all()
 except OperationalError as e:
-    print("ERR: A database error occurred. Is it running? Details:\n{}".format(e))
+    print("ERR: A database error occurred. Is it running? Details:\n\n{}".format(e))
+    db.session.rollback()

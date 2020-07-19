@@ -15,4 +15,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Default range of numbers to use when generating a random number
-    MAXIMUM_NUMBER_RANGE = int(os.environ.get("MAXIMUM_NUMBER_RANGE")) or 10
+    DEFAULT_MAXIMUM_NUMBER_RANGE = os.environ.get("DEFAULT_MAXIMUM_NUMBER_RANGE") or 10

@@ -3,12 +3,27 @@
 ## Setup on Mac
 ### Install psycorp2 on MacOs
 ```
-brew install postgresql
+# Install venv
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+
+# Install psycorp2 pre-reqs using brew
+brew install gcc
+brew install openssl@1.1
+brew install readline
 brew install libpq
-env LDFLAGS='-L/usr/local/lib -L/usr/local/opt/openssl/lib\n-L/usr/local/opt/readline/lib' pip install psycopg2
+brew install postgresql
+
+# Install PyPi packages with some C compiler flags set (required for libpq)
+env LDFLAGS='-L/usr/local/opt/libpq/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib' pip install -r requirements.txt
 ```
 
-### IDE has issues with swagger-ui add-on
+The `LDFLAGS` location can be found by using `brew info <package>` (for openssl and readline) or `pg_config` (LIBDIR - for libpq)
+
+
+# Run the app
 ```
-pip install -r requirements.txt
+source venv/bin/activate
+flask run
 ```
