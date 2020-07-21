@@ -8,6 +8,15 @@ app.config.from_object(Config)      # Import from config.py
 db = SQLAlchemy(app)
 
 
+def create_tables():
+    # Create tables todo: this isn't running under gunicorn
+    try:
+        db.create_all()
+    except OperationalError as e:
+        print("ERR: A database error occurred. Is it running? Details:\n\n{}".format(e))
+        db.session.rollback()
+
+
 @app.route('/random_number')
 def random_number():
     """
@@ -39,10 +48,3 @@ def show_numbers():
 
 # Avoid circular dependencies
 from random_number import generator, models
-
-# Create tables
-try:
-    db.create_all()
-except OperationalError as e:
-    print("ERR: A database error occurred. Is it running? Details:\n\n{}".format(e))
-    db.session.rollback()

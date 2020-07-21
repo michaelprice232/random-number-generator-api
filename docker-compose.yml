@@ -1,8 +1,39 @@
 version: '3.1'
 
 services:
+  app_server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DEFAULT_MAXIMUM_NUMBER_RANGE: 30
+      SECRET_KEY: 'you-will-never-guess'
+      DATABASE_URL: 'postgres+psycopg2://postgres:1234@db_server:5432/random_numbers'
+    networks:
+      - app-tier
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db_server
 
-  db:
+  # Create database schema
+  db_init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: on-failure
+    environment:
+      DEFAULT_MAXIMUM_NUMBER_RANGE: 30
+      SECRET_KEY: 'you-will-never-guess'
+      DATABASE_URL: 'postgres+psycopg2://postgres:1234@db_server:5432/random_numbers'
+    entrypoint: [ "python", "-c", "from random_number import db, app; db.create_all()" ]
+    networks:
+      - app-tier
+    depends_on:
+      - db_server
+
+  db_server:
     image: postgres:11
     restart: always
     environment:
