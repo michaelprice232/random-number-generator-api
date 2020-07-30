@@ -1,49 +1,64 @@
-version: '3.1'
+version: "3.1"
 
 services:
+  # nginx web server
+  web_server:
+    build:
+      context: .
+      dockerfile: ./web-server-config/Dockerfile-web-server
+    restart: "always"
+    networks:
+      - app
+    ports:
+      - "80:80"
+    depends_on:
+      - app_server
+
+  # Gunicorn app server
   app_server:
     build:
       context: .
-      dockerfile: Dockerfile
-    restart: always
+      dockerfile: ./app-server-config/Dockerfile-app-server
+    restart: "always"
     environment:
       DEFAULT_MAXIMUM_NUMBER_RANGE: 30
-      SECRET_KEY: 'you-will-never-guess'
-      DATABASE_URL: 'postgres+psycopg2://postgres:1234@db_server:5432/random_numbers'
+      SECRET_KEY: "you-will-never-guess"
+      DATABASE_URL: "postgres+psycopg2://postgres:1234@db_server:5432/random_numbers"
     networks:
-      - app-tier
-    ports:
-      - "5000:5000"
+      - app
+#    ports:
+#      - "5000:5000"
     depends_on:
+      - db_init
       - db_server
 
   # Create database schema
   db_init:
     build:
       context: .
-      dockerfile: Dockerfile
-    restart: on-failure
+      dockerfile: ./app-server-config/Dockerfile-app-server
+    restart: "on-failure"   # run once
     environment:
-      DEFAULT_MAXIMUM_NUMBER_RANGE: 30
-      SECRET_KEY: 'you-will-never-guess'
-      DATABASE_URL: 'postgres+psycopg2://postgres:1234@db_server:5432/random_numbers'
-    entrypoint: [ "python", "-c", "from random_number import db, app; db.create_all()" ]
+      SECRET_KEY: "you-will-never-guess"
+      DATABASE_URL: "postgres+psycopg2://postgres:1234@db_server:5432/random_numbers"
+    entrypoint: [ "python", "-c", "import time, config; from random_number import db, app, models; time.sleep(5); db.create_all(); print('Schema deployed')" ]
     networks:
-      - app-tier
+      - app
     depends_on:
       - db_server
 
+  # Postgres database
   db_server:
     image: postgres:11
-    restart: always
+    restart: "always"
     environment:
       POSTGRES_PASSWORD: 1234       # change me
       POSTGRES_DB: random_numbers
     networks:
-      - app-tier
+      - app
     ports:
     - "5432:5432"
 
 networks:
-  app-tier:
+  app:
     driver: bridge

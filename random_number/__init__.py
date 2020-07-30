@@ -9,7 +9,7 @@ db = SQLAlchemy(app)
 
 
 def create_tables():
-    # Create tables todo: this isn't running under gunicorn
+    # Create tables using SQLAlchemy
     try:
         db.create_all()
     except OperationalError as e:
@@ -17,11 +17,11 @@ def create_tables():
         db.session.rollback()
 
 
-@app.route('/random_number')
+@app.route('/api/random_number')
 def random_number():
     """
     Generates a random number
-    'max' query parmeter can be used to increase the max range of the random number
+    'max' query parameter can be used to increase the max range of the random number
     e.g. curl 'http://127.0.0.1:5000/random_number?max=50'
 
     :return: dict containing the random number, current time & and the max range
@@ -37,7 +37,7 @@ def random_number():
         return generator.random_number_handler(max_query_param)
 
 
-@app.route('/show_numbers')
+@app.route('/api/show_numbers')
 def show_numbers():
     """
     Show all the entries in the database table for previously generated random numbers

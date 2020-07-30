@@ -1,0 +1,12 @@
+FROM nginx:1.19
+
+RUN rm -f /usr/share/nginx/html/*.html \
+          /etc/nginx/nginx.conf \
+          /etc/nginx/conf.d/*.conf
+
+COPY static/* /usr/share/nginx/html/
+
+COPY ./web-server-config/nginx.conf /etc/nginx/
+
+COPY ./web-server-config/server-block.conf /etc/nginx/conf.d/
+

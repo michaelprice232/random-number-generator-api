@@ -1,4 +1,4 @@
-from random_number import app, create_tables
+from random_number import app
 
 
 if __name__ == "__main__":

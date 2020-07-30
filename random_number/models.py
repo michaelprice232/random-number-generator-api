@@ -1,6 +1,7 @@
 from random_number import db
 
 
+# Table to store generated random number data in
 class Numbers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number = db.Column(db.Integer, nullable=False)

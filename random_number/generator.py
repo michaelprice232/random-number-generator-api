@@ -29,7 +29,7 @@ def random_number_handler(max_range):
                 return database_resp[1], database_resp[2]
 
             else:
-
+                # Success. Return the object
                 return_object = {
                     'Number': resp[0],
                     'Created_at': resp[1].strftime("%Y-%m-%d %H:%M:%S"),
@@ -40,28 +40,6 @@ def random_number_handler(max_range):
     except ValueError as e:
         function_error = "ERR: parameter must be an cast-able to an integer. Exception details:\n\n{}".format(e)
         return function_error, 400
-
-
-def show_numbers_handler():
-    """
-    Handler for the 'show_numbers' view
-    Shows all the entries in the database table for previously generated random numbers
-
-    :return: dict containing a list of all random numbers which have been recorded in the database
-    """
-    try:
-        results = [{'id': n.id,
-                    'number': n.number,
-                    'timestamp': n.timestamp,
-                    'max_range': n.max_range
-                    } for n in models.Numbers.query.all()]
-        result_obj = {'numbers': results}
-        return result_obj
-
-    except OperationalError as e:
-        function_error = "ERR: A database error occurred. Is it running? Details:\n\n{}".format(e)
-        db.session.rollback()
-        return function_error, 500
 
 
 def generate_random_number(max_range):
@@ -89,7 +67,7 @@ def generate_random_number(max_range):
             return False, function_error, 400
 
     except ValueError as e:
-        function_error = "ERR: parameter must be an cast-able to an integer"
+        function_error = "ERR: parameter must be cast-able to an integer"
         return False, function_error, 400
 
 
@@ -100,7 +78,7 @@ def write_to_database(r_number_tuple):
     :return: None
     """
     # Check a 3 item tuple has been passed
-    if r_number_tuple != 3 and type(r_number_tuple) is not tuple:
+    if type(r_number_tuple) is not tuple and len(r_number_tuple) != 3:
         function_error = "ERR: 'r_number_tuple' must be 3 items in a tuple e.g. (<number>, <timestamp>, <max_range>)"
         return False, function_error, 400
 
@@ -135,3 +113,24 @@ def write_to_database(r_number_tuple):
             db.session.rollback()
             return False, function_error, 500
 
+
+def show_numbers_handler():
+    """
+    Handler for the 'show_numbers' view
+    Shows all the entries in the database table for previously generated random numbers
+
+    :return: dict containing a list of all random numbers which have been recorded in the database
+    """
+    try:
+        results = [{'id': n.id,
+                    'number': n.number,
+                    'timestamp': n.timestamp,
+                    'max_range': n.max_range
+                    } for n in models.Numbers.query.all()]
+        result_obj = {'numbers': results}
+        return result_obj
+
+    except OperationalError as e:
+        function_error = "ERR: A database error occurred. Is it running? Details:\n\n{}".format(e)
+        db.session.rollback()
+        return function_error, 500
