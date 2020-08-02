@@ -50,7 +50,7 @@ services:
   # Postgres database
   db_server:
     image: postgres:11
-    #restart: "always"
+    restart: "always"
     environment:
       POSTGRES_PASSWORD: 1234       # change me
       POSTGRES_DB: random_numbers

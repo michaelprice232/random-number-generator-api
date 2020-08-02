@@ -2,7 +2,8 @@ FROM nginx:1.19
 
 RUN rm -f /usr/share/nginx/html/*.html \
           /etc/nginx/nginx.conf \
-          /etc/nginx/conf.d/*.conf
+          /etc/nginx/conf.d/*.conf \
+          /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
 
 COPY static/* /usr/share/nginx/html/
 
