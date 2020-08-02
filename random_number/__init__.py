@@ -1,20 +1,11 @@
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
-from sqlalchemy.exc import OperationalError
+from healthcheck import HealthCheck
 
 app = Flask(__name__)
 app.config.from_object(Config)      # Import from config.py
 db = SQLAlchemy(app)
-
-
-def create_tables():
-    # Create tables using SQLAlchemy
-    try:
-        db.create_all()
-    except OperationalError as e:
-        print("ERR: A database error occurred. Is it running? Details:\n\n{}".format(e))
-        db.session.rollback()
 
 
 @app.route('/api/random_number')
@@ -46,5 +37,27 @@ def show_numbers():
     return generator.show_numbers_handler()
 
 
-# Avoid circular dependencies
+# Create health check endpoint
+health = HealthCheck()
+
+
+def db_health_check():
+    is_database_working = True
+    output = "database online"
+
+    try:
+        # execute raw query to check database availability
+        db.session.execute("SELECT 1")
+    except Exception as e:
+        output = str(e)
+        is_database_working = False
+
+    return is_database_working, output
+
+
+health.add_check(db_health_check)
+app.add_url_rule("/healthcheck", "healthcheck", view_func=lambda: health.run())
+
+
+# Additional imports. Avoid circular dependencies
 from random_number import generator, models
