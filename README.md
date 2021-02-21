@@ -15,62 +15,68 @@ docker-compose up -d
 ```
 % curl --silent 'http://localhost/api/random_number' | jq -r
 {
-  "Created_at": "2020-07-30 17:08:32",
+  "Created_at": "2021-02-21 08:11:03",
   "Max_range": 30,
-  "Number": 11
+  "Number": 26
 }
 ```
 
 ### Generate a random number using a custom range (passed via query parameter):
 ```
-% curl --silent 'http://localhost/api/random_number?max=100' | jq -r
+ curl --silent 'http://localhost/api/random_number?max=100' | jq -r
 {
-  "Created_at": "2020-07-30 17:11:41",
+  "Created_at": "2021-02-21 08:11:27",
   "Max_range": 100,
-  "Number": 4
+  "Number": 44
 }
+
 ```
 
 ### Show previously generated numbers stored in the database:
 ```
 % curl --silent 'http://localhost/api/show_numbers' | jq -r
 {
+% curl --silent 'http://localhost/api/random_number' | jq -r
+{
+  "Created_at": "2021-02-21 08:11:03",
+  "Max_range": 30,
+  "Number": 26
+}
+Michael.Price@C02DN47VMD6M random-generator % curl --silent 'http://localhost/api/random_number?max=100' | jq -r
+{
+  "Created_at": "2021-02-21 08:11:27",
+  "Max_range": 100,
+  "Number": 44
+}
+Michael.Price@C02DN47VMD6M random-generator % 
+Michael.Price@C02DN47VMD6M random-generator % 
+Michael.Price@C02DN47VMD6M random-generator % curl --silent 'http://localhost/api/show_numbers' | jq -r 
+{
   "numbers": [
     {
       "id": 1,
       "max_range": 30,
-      "number": 29,
-      "timestamp": "Thu, 30 Jul 2020 17:08:27 GMT"
+      "number": 16,
+      "timestamp": "Sun, 21 Feb 2021 08:10:59 GMT"
     },
     {
       "id": 2,
       "max_range": 30,
-      "number": 11,
-      "timestamp": "Thu, 30 Jul 2020 17:08:32 GMT"
+      "number": 26,
+      "timestamp": "Sun, 21 Feb 2021 08:11:03 GMT"
     },
+...
+  ]
+}
+
     ...
 ```
 
-# Setup on Mac
-## Install psycorp2 on MacOs
-```
-# Install venv
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
+## Running on AWS
 
-# Install psycorp2 pre-reqs using brew
-brew install gcc
-brew install openssl@1.1
-brew install readline
-brew install libpq
-brew install postgresql
+The codebase has been modified to work with AWS Lambda & API gateway in the `./aws-lambda` directory.
 
-# Install PyPi packages with some C compiler flags set (required for libpq)
-env LDFLAGS='-L/usr/local/opt/libpq/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib' pip install -r requirements.txt
-```
-
-The `LDFLAGS` location can be found by using `brew info <package>` (for openssl and readline) or `pg_config` (LIBDIR - for libpq)
+Passing the `max_range` query string is optional
 
 
 
